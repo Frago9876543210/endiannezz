@@ -1,0 +1,12 @@
+[package]
+name = "endiannezz"
+version = "0.1.0"
+authors = ["Frago9876543210"]
+edition = "2018"
+license = "MIT"
+description = "Zero dependencies library for I/O endianness on high-level"
+repository = "https://github.com/Frago9876543210/endiannezz"
+documentation = "https://docs.rs/endiannezz"
+keywords = ["endian", "endianness", "binary", "io", "little-endian", "big-endian"]
+categories = ["encoding", "parsing", "rust-patterns"]
+readme = "README.md"
