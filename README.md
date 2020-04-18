@@ -1,5 +1,8 @@
 endiannezz
 ==========
+[![Build Status](https://travis-ci.org/Frago9876543210/endiannezz.svg?branch=master)](https://travis-ci.org/Frago9876543210/endiannezz)
+[![Latest Version](https://img.shields.io/crates/v/endiannezz.svg)](https://crates.io/crates/endiannezz)
+[![Documentation](https://docs.rs/endiannezz/badge.svg)](https://docs.rs/endiannezz/)
 
 Zero dependencies library for I/O endianness on high-level
 
