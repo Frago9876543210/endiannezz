@@ -7,6 +7,6 @@ license = "MIT"
 description = "Zero dependencies library for I/O endianness on high-level"
 repository = "https://github.com/Frago9876543210/endiannezz"
 documentation = "https://docs.rs/endiannezz"
-keywords = ["endian", "endianness", "binary", "io", "little-endian", "big-endian"]
+keywords = ["endian", "endianness", "binary", "little-endian", "big-endian"]
 categories = ["encoding", "parsing", "rust-patterns"]
 readme = "README.md"
