@@ -65,7 +65,7 @@ use std::mem;
 /// This trait is implemented for all primitive types that exist in rust,
 /// and allows to read types from bytes or write them into bytes
 //noinspection RsSelfConvention
-pub trait Primitive: Sized {
+pub trait Primitive: Sized + Copy {
 	type Buf: AsRef<[u8]> + AsMut<[u8]> + Default;
 
 	fn to_ne_bytes(self) -> Self::Buf;
