@@ -179,3 +179,10 @@ impl<W: Write + ?Sized> EndianWriter for W {
 		E::write(primitive, self)
 	}
 }
+
+/// Allows the type to be encoded/decoded using binary format
+pub trait CanIo: Sized {
+	fn write<W: Write>(&self, w: W) -> Result<()>;
+
+	fn read<R: Read>(r: R) -> Result<Self>;
+}
