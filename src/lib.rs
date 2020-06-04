@@ -115,6 +115,7 @@ impl_primitives![
 	i8,    u8,
 	i16,   u16,
 	i32,   u32,
+	f32,   f64,
 	i64,   u64,
 	i128,  u128,
 	isize, usize,
