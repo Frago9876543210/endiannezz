@@ -21,8 +21,8 @@ impl OnlyCanIo for Io {}
 impl<T: Primitive> HackedPrimitive for T {}
 
 pub trait HackedCanIo: CanIo {
-	fn write_hacked<E: OnlyCanIo, W: Write>(self, w: W) -> Result<()> {
-		CanIo::write(&self, w)
+	fn write_hacked<E: OnlyCanIo, W: Write>(&self, w: W) -> Result<()> {
+		CanIo::write(self, w)
 	}
 
 	fn read_hacked<E: OnlyCanIo, R: Read>(r: R) -> Result<Self> {
