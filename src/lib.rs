@@ -62,6 +62,12 @@ fn main() {
 use std::io::{Read, Result, Write};
 use std::mem;
 
+/// Internal module to simplify `proc_macro` implementation
+///
+/// The main goal is to be able to call `write` method on `CanIo` xor `Primitive` and
+/// get clean error on compile-time
+pub mod internal;
+
 /// This trait is implemented for all primitive types that exist in rust,
 /// and allows to read types from bytes or write them into bytes
 //noinspection RsSelfConvention
