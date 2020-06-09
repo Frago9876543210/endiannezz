@@ -12,20 +12,14 @@ pub trait HackedPrimitive: Primitive {
 	}
 }
 
-pub trait OnlyCanIo {}
-
-pub enum Io {}
-
-impl OnlyCanIo for Io {}
-
 impl<T: Primitive> HackedPrimitive for T {}
 
 pub trait HackedCanIo: CanIo {
-	fn write_hacked<E: OnlyCanIo, W: Write>(&self, w: W) -> Result<()> {
+	fn write_hacked<E: Endian, W: Write>(&self, w: W) -> Result<()> {
 		CanIo::write(self, w)
 	}
 
-	fn read_hacked<E: OnlyCanIo, R: Read>(r: R) -> Result<Self> {
+	fn read_hacked<E: Endian, R: Read>(r: R) -> Result<Self> {
 		CanIo::read(r)
 	}
 }
