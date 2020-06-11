@@ -162,29 +162,25 @@ impl_endianness![
 	BigEndian    to_be_bytes from_be_bytes,
 ];
 
-/// Allows to read primitive types with differents representation of bytes
-pub trait EndianReader: Read {
-	fn try_read<E: Endian, T: Primitive>(&mut self) -> Result<T>;
+/// Allows to write primitive types with differents representation of bytes
+pub trait EndianWriter: Write {
+	#[inline]
+	fn try_write<E: Endian, T: Primitive>(&mut self, primitive: T) -> Result<()> {
+		E::write(primitive, self)
+	}
 }
 
-impl<R: Read + ?Sized> EndianReader for R {
+impl<W: Write + ?Sized> EndianWriter for W {}
+
+/// Allows to read primitive types with differents representation of bytes
+pub trait EndianReader: Read {
 	#[inline]
 	fn try_read<E: Endian, T: Primitive>(&mut self) -> Result<T> {
 		E::read(self)
 	}
 }
 
-/// Allows to write primitive types with differents representation of bytes
-pub trait EndianWriter: Write {
-	fn try_write<E: Endian, T: Primitive>(&mut self, primitive: T) -> Result<()>;
-}
-
-impl<W: Write + ?Sized> EndianWriter for W {
-	#[inline]
-	fn try_write<E: Endian, T: Primitive>(&mut self, primitive: T) -> Result<()> {
-		E::write(primitive, self)
-	}
-}
+impl<R: Read + ?Sized> EndianReader for R {}
 
 /// Allows the type to be encoded/decoded using binary format
 pub trait CanIo: Sized {
