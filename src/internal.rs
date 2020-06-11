@@ -1,6 +1,6 @@
 use std::io::{Read, Result, Write};
 
-use crate::{Io, Endian, Primitive};
+use crate::{Endian, Io, Primitive};
 
 pub trait HackedPrimitive: Primitive {
 	fn write_hacked<E: Endian, W: Write>(self, w: W) -> Result<()> {
