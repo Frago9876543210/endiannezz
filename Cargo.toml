@@ -10,3 +10,11 @@ documentation = "https://docs.rs/endiannezz"
 keywords = ["endian", "endianness", "binary", "little-endian", "big-endian"]
 categories = ["encoding", "parsing", "rust-patterns"]
 readme = "README.md"
+
+[features]
+default = ["inline_primitives"]
+
+#Usually, inlining of primitives make sense. Turn it off if you don't think so.
+inline_primitives = []
+#NOTE: It may increase size of binary is some cases.
+inline_io = []
