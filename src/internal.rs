@@ -1,6 +1,6 @@
 use std::io::{Read, Result, Write};
 
-use crate::{CanIo, Endian, Primitive};
+use crate::{Io, Endian, Primitive};
 
 pub trait HackedPrimitive: Primitive {
 	fn write_hacked<E: Endian, W: Write>(self, w: W) -> Result<()> {
@@ -14,14 +14,14 @@ pub trait HackedPrimitive: Primitive {
 
 impl<T: Primitive> HackedPrimitive for T {}
 
-pub trait HackedCanIo: CanIo {
+pub trait HackedIo: Io {
 	fn write_hacked<E: Endian, W: Write>(&self, w: W) -> Result<()> {
-		CanIo::write(self, w)
+		Io::write(self, w)
 	}
 
 	fn read_hacked<E: Endian, R: Read>(r: R) -> Result<Self> {
-		CanIo::read(r)
+		Io::read(r)
 	}
 }
 
-impl<T: CanIo> HackedCanIo for T {}
+impl<T: Io> HackedIo for T {}

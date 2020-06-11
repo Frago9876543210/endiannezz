@@ -64,7 +64,7 @@ use std::mem;
 
 /// Internal module to simplify `proc_macro` implementation
 ///
-/// The main goal is to be able to call `write` method on `CanIo` xor `Primitive` and
+/// The main goal is to be able to call `write` method on `Io` xor `Primitive` and
 /// get clean error on compile-time
 pub mod internal;
 
@@ -169,7 +169,7 @@ impl_endianness![
 ];
 
 /// Allows the type to be encoded/decoded using binary format
-pub trait CanIo: Sized {
+pub trait Io: Sized {
 	fn write<W: Write>(&self, w: W) -> Result<()>;
 
 	fn read<R: Read>(r: R) -> Result<Self>;
