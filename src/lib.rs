@@ -124,13 +124,9 @@ macro_rules! impl_primitives {
 }
 
 impl_primitives![
-	i8,    u8,
-	i16,   u16,
-	i32,   u32,
-	f32,   f64,
-	i64,   u64,
-	i128,  u128,
-	isize, usize,
+	i8, i16, i32, i64, i128, isize,
+	u8, u16, u32, u64, u128, usize,
+	f32, f64,
 ];
 
 /// Proxy for reading and writing primitive types
