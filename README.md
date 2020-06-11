@@ -14,7 +14,7 @@ endiannezz = "0.3"
 ### Example
 ```rust
 use std::io::Result;
-use endiannezz::{BigEndian, EndianReader, EndianWriter, LittleEndian, NativeEndian};
+use endiannezz::{NativeEndian, LittleEndian, BigEndian, ext::{EndianReader, EndianWriter}};
 
 fn main() -> Result<()> {
 	let mut vec = Vec::new();

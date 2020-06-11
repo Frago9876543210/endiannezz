@@ -18,7 +18,7 @@ Now it's possible to have traits that expand [`Read`] and [`Write`] with new met
 # Example
 ```rust
 use std::io::Result;
-use endiannezz::{BigEndian, EndianReader, EndianWriter, LittleEndian, NativeEndian};
+use endiannezz::{NativeEndian, LittleEndian, BigEndian, ext::{EndianReader, EndianWriter}};
 
 fn main() -> Result<()> {
 	let mut vec = Vec::new();
@@ -67,6 +67,12 @@ use std::mem;
 /// The main goal is to be able to call `write` method on `CanIo` xor `Primitive` and
 /// get clean error on compile-time
 pub mod internal;
+
+/// Provides extensions for [`Read`] and [`Write`] traits
+///
+/// [`Read`]: https://doc.rust-lang.org/std/io/trait.Read.html
+/// [`Write`]: https://doc.rust-lang.org/std/io/trait.Write.html
+pub mod ext;
 
 /// This trait is implemented for all primitive types that exist in rust,
 /// and allows to read types from bytes or write them into bytes
@@ -161,26 +167,6 @@ impl_endianness![
 	LittleEndian to_le_bytes from_le_bytes,
 	BigEndian    to_be_bytes from_be_bytes,
 ];
-
-/// Allows to write primitive types with differents representation of bytes
-pub trait EndianWriter: Write {
-	#[inline]
-	fn try_write<E: Endian, T: Primitive>(&mut self, primitive: T) -> Result<()> {
-		E::write(primitive, self)
-	}
-}
-
-impl<W: Write + ?Sized> EndianWriter for W {}
-
-/// Allows to read primitive types with differents representation of bytes
-pub trait EndianReader: Read {
-	#[inline]
-	fn try_read<E: Endian, T: Primitive>(&mut self) -> Result<T> {
-		E::read(self)
-	}
-}
-
-impl<R: Read + ?Sized> EndianReader for R {}
 
 /// Allows the type to be encoded/decoded using binary format
 pub trait CanIo: Sized {
