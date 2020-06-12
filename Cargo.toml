@@ -19,7 +19,6 @@ default = ["inline_primitives", "derive"]
 
 #Provide derive(Io) proc macro
 derive = ["endiannezz_derive"]
-
 #Usually, inlining of primitives make sense. Turn it off if you don't think so.
 inline_primitives = []
 #NOTE: It may increase size of binary is some cases.
