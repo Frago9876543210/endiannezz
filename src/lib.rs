@@ -59,16 +59,20 @@ fn main() {
 [`Write`]: https://doc.rust-lang.org/std/io/trait.Write.html
 */
 
-use std::io::{Read, Result, Write};
+use std::io::{Error, ErrorKind, Read, Result, Write};
 use std::mem;
 
+#[cfg(feature = "derive")]
 #[doc(hidden)]
 pub use endiannezz_derive::*;
+
+use crate::ext::{EndianReader, EndianWriter};
 
 /// Internal module to simplify `proc_macro` implementation
 ///
 /// The main goal is to be able to call `write` method on `Io` xor `Primitive` and
 /// get clean error on compile-time
+#[cfg(feature = "derive")]
 pub mod internal;
 
 /// Provides extensions for [`Read`] and [`Write`] traits
@@ -172,4 +176,24 @@ pub trait Io: Sized {
 	fn write<W: Write>(&self, w: W) -> Result<()>;
 
 	fn read<R: Read>(r: R) -> Result<Self>;
+}
+
+/// Binary representation of a bool
+impl Io for bool {
+	#[cfg_attr(feature = "inline_primitives", inline)]
+	fn write<W: Write>(&self, mut w: W) -> Result<()> {
+		w.try_write::<NativeEndian, u8>(if *self { 1 } else { 0 })
+	}
+
+	#[cfg_attr(feature = "inline_primitives", inline)]
+	fn read<R: Read>(mut r: R) -> Result<Self> {
+		match r.try_read::<NativeEndian, u8>()? {
+			0 => Ok(false),
+			1 => Ok(true),
+			_ => Err(Error::new(
+				ErrorKind::Other,
+				"Received invalid value for bool",
+			)),
+		}
+	}
 }
