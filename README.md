@@ -9,9 +9,48 @@ Zero dependencies library for I/O endianness on high-level
 ### Installing
 ```toml
 [dependencies]
-endiannezz = "0.3"
+endiannezz = "0.4"
 ```
-### Example
+### Using `#[derive(Io)]`
+```rust
+use std::io::Result;
+use endiannezz::Io;
+
+#[derive(Io)]
+#[endian(big)]
+struct ParseMe {
+	works: bool,
+	data: u32,
+	#[endian(little)]
+	extra: i16,
+}
+
+fn main() -> Result<()> {
+	let s1 = ParseMe {
+		works: true,
+		data: 10,
+		extra: 20,
+	};
+
+	//writing struct as bytes into vec
+	let mut vec = Vec::new();
+	s1.write(&mut vec)?;
+
+	let mut slice = vec.as_slice();
+	assert_eq!(slice, &[
+		1, //bool as byte
+		0, 0, 0, 10, //u32 in big-endian (because big-endian is set on top place struct as default)
+		20, 0, //i16 in little-endian (overriding default)
+	]);
+
+	//reading struct from bytes
+	let _s2 = ParseMe::read(&mut slice)?;
+
+	Ok(())
+}
+```
+
+### Simple example
 ```rust
 use std::io::Result;
 use endiannezz::{NativeEndian, LittleEndian, BigEndian, ext::{EndianReader, EndianWriter}};

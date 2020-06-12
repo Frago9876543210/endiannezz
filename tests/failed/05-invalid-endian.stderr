@@ -1,0 +1,5 @@
+error: failed to determine endian
+ --> $DIR/05-invalid-endian.rs:4:10
+  |
+4 | #[endian(invalid)]
+  |          ^^^^^^^

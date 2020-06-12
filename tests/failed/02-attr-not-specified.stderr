@@ -1,0 +1,5 @@
+error: please specify default endian
+ --> $DIR/02-attr-not-specified.rs:4:1
+  |
+4 | struct Foo;
+  | ^^^^^^^^^^^
