@@ -3,6 +3,8 @@ name = "endiannezz_derive"
 version = "0.1.0"
 authors = ["Frago9876543210"]
 edition = "2018"
+license = "MIT"
+description = "Addition to endiannezz crate that allows derive(Io)"
 
 [lib]
 proc-macro = true
