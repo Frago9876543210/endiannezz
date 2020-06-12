@@ -11,6 +11,9 @@ keywords = ["endian", "endianness", "binary", "little-endian", "big-endian"]
 categories = ["encoding", "parsing", "rust-patterns"]
 readme = "README.md"
 
+[dev-dependencies]
+trybuild = "1.0"
+
 [dependencies]
 endiannezz_derive = { version = "*", path = "derive", optional = true }
 

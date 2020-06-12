@@ -1,0 +1,11 @@
+error: this attribute does not make sense
+ --> $DIR/06-no-sense.rs:6:2
+  |
+6 |     #[endian(little)]
+  |     ^^^^^^^^^^^^^^^^^
+
+error: this attribute does not make sense
+  --> $DIR/06-no-sense.rs:13:2
+   |
+13 |     #[endian(little)]
+   |     ^^^^^^^^^^^^^^^^^
