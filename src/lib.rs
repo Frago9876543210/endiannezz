@@ -62,6 +62,9 @@ fn main() {
 use std::io::{Read, Result, Write};
 use std::mem;
 
+#[doc(hidden)]
+pub use endiannezz_derive::*;
+
 /// Internal module to simplify `proc_macro` implementation
 ///
 /// The main goal is to be able to call `write` method on `Io` xor `Primitive` and
