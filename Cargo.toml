@@ -12,7 +12,7 @@ categories = ["encoding", "parsing", "rust-patterns"]
 readme = "README.md"
 
 [dependencies]
-endiannezz_derive = { version = "*", path = "endiannezz_derive", optional = true }
+endiannezz_derive = { version = "*", path = "derive", optional = true }
 
 [features]
 default = ["inline_primitives", "derive"]
