@@ -15,10 +15,13 @@ readme = "README.md"
 members = ["endiannezz_derive"]
 
 [dependencies]
-endiannezz_derive = { version = "*", optional = true, path = "endiannezz_derive" }
+endiannezz_derive = { version = "*", path = "endiannezz_derive", optional = true }
 
 [features]
-default = ["inline_primitives"]
+default = ["inline_primitives", "derive"]
+
+#Provide derive(Io) proc macro
+derive = ["endiannezz_derive"]
 
 #Usually, inlining of primitives make sense. Turn it off if you don't think so.
 inline_primitives = []
