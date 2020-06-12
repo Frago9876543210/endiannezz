@@ -11,9 +11,6 @@ keywords = ["endian", "endianness", "binary", "little-endian", "big-endian"]
 categories = ["encoding", "parsing", "rust-patterns"]
 readme = "README.md"
 
-[workspace]
-members = ["endiannezz_derive"]
-
 [dependencies]
 endiannezz_derive = { version = "*", path = "endiannezz_derive", optional = true }
 
