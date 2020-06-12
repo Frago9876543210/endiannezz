@@ -15,7 +15,7 @@ All these types are enums, which means that you cannot create them, only pass to
 
 Now it's possible to have traits that expand [`Read`] and [`Write`] with new methods.
 
-# Example
+# Simple example
 ```rust
 use std::io::Result;
 use endiannezz::{NativeEndian, LittleEndian, BigEndian, ext::{EndianReader, EndianWriter}};
@@ -46,6 +46,83 @@ fn main() {
 	BigEndian::write(1, &mut vec).unwrap();
 	LittleEndian::write::<u16, _>(2, &mut vec).unwrap();
 	assert_eq!(vec.as_slice(), &[0, 0, 0, 1, 2, 0])
+}
+```
+
+# Using `#[derive(Io)]` to describe complex binary formats
+```rust
+use std::io::{Read, Result, Write};
+use endiannezz::{ext::{EndianReader, EndianWriter}, Io, LittleEndian};
+
+struct Bytes(Vec<u8>);
+
+//Custom implementation of read and write
+//Use it for complex types, which can be built from primitives
+impl Io for Bytes {
+	fn write<W: Write>(&self, mut w: W) -> Result<()> {
+		w.try_write::<LittleEndian, u32>(self.0.len() as u32)?;
+		w.write_all(self.0.as_slice())?;
+		Ok(())
+	}
+
+	fn read<R: Read>(mut r: R) -> Result<Self> {
+		let capacity = r.try_read::<LittleEndian, u32>()? as usize;
+		let mut vec = vec![0; capacity];
+		r.read_exact(&mut vec)?;
+		Ok(Self(vec))
+	}
+}
+
+#[derive(Io)]
+#[endian(little)] //default endian for for fields of struct (except custom impl, such as Bytes)
+//There are 3 types of endianness and they can be written in the `#[endian]` attribute as follows:
+// - NativeEndian: `_`, `ne`, `native`
+// - LittleEndian: `le`, `little`
+// - BigEndian: `be`, `big`
+struct Message {
+	bytes: Bytes, //will read/write data as is (according to implementation)
+	distance: u16, //u16 in little-endian
+
+	#[endian(big)]
+	delta: f32, //f32 in big-endian, you can override default endian!
+
+	#[endian(native)] //machine byte order
+	machine_data: u32,
+}
+
+fn main() -> Result<()> {
+	let message = Message {
+		bytes: Bytes(vec![0xde, 0xad, 0xbe, 0xef]),
+		distance: 5,
+		delta: 2.41,
+		machine_data: 41,
+	};
+
+	//writing message into Vec
+	let mut vec = Vec::new();
+	message.write(&mut vec)?;
+
+	//explain
+	let mut excepted = vec![
+		4, 0, 0, 0, //bytes len in little-endian
+		0xde, 0xad, 0xbe, 0xef, //buffer
+		5, 0, //distance in little-endian
+		0x40, 0x1a, 0x3d, 0x71, //delta in big-endian
+	];
+
+	if cfg!(target_endian = "little") {
+		excepted.extend(&[41, 0, 0, 0]); //machine_data on little-endian CPUs
+	} else {
+		excepted.extend(&[0, 0, 0, 41]); //machine_data on big-endian CPUs
+	}
+
+	assert_eq!(vec, excepted);
+
+	//reading message from slice
+	let mut slice = vec.as_slice();
+	let _message1 = Message::read(&mut slice)?;
+
+	Ok(())
 }
 ```
 
