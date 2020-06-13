@@ -1,6 +1,6 @@
 [package]
 name = "endiannezz"
-version = "0.4.0"
+version = "0.4.1"
 authors = ["Frago9876543210"]
 edition = "2018"
 license = "MIT"
@@ -15,7 +15,7 @@ readme = "README.md"
 trybuild = "1.0"
 
 [dependencies]
-endiannezz_derive = { version = "0.1.0", path = "derive", optional = true }
+endiannezz_derive = { version = "0.1.1", path = "derive", optional = true }
 
 [features]
 default = ["inline_primitives", "derive"]

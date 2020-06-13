@@ -35,14 +35,13 @@ fn parse_attr(attr: &Attribute) -> Result<TokenStream> {
 	Ok(determine_endian(ident)?)
 }
 
-pub fn parse(attrs: &[Attribute]) -> Result<Option<TokenStream>> {
-	let attr = only_one(attrs.iter())
-		.filter(|attr| attr.path.is_ident("endian"));
+pub fn find<'a>(attrs: &'a [Attribute], name: &str) -> Option<&'a Attribute> {
+	only_one(attrs.iter()
+		.filter(|attr| attr.path.is_ident(name)))
+}
 
-	Ok(match attr {
-		None => None,
-		Some(attr) => Some(parse_attr(attr)?),
-	})
+pub fn parse(attrs: &[Attribute]) -> Result<Option<TokenStream>> {
+	find(attrs, "endian").map(parse_attr).transpose()
 }
 
 pub fn get_endian(attrs: &[Attribute], default: TokenStream) -> Result<TokenStream> {

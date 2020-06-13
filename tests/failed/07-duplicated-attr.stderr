@@ -1,0 +1,7 @@
+error: please specify default endian
+  --> $DIR/07-duplicated-attr.rs:9:1
+   |
+9  | / #[endian(big)]
+10 | | #[endian(native)]
+11 | | struct Nope;
+   | |____________^
