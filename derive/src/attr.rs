@@ -30,7 +30,7 @@ fn parse_attr(attr: &Attribute) -> Result<TokenStream> {
 			NestedMeta::Meta(Meta::Path(path)) => path.get_ident(),
 			_ => None,
 		})
-		.ok_or(Error::new_spanned(attr, "excepted endian"))?;
+		.ok_or_else(|| Error::new_spanned(attr, "excepted endian"))?;
 
 	Ok(determine_endian(ident)?)
 }
