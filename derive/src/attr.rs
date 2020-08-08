@@ -1,5 +1,5 @@
 use proc_macro2::{Ident, TokenStream};
-use syn::{Attribute, Error, Meta, NestedMeta, Result};
+use syn::{Attribute, Error, Result};
 
 use quote::quote;
 
@@ -10,29 +10,15 @@ fn only_one<I: Iterator<Item = T>, T>(mut it: I) -> Option<T> {
     }
 }
 
-fn determine_endian(ident: &Ident) -> Result<TokenStream> {
+fn parse_attr(attr: &Attribute) -> Result<TokenStream> {
+    let ident = attr.parse_args::<Ident>()?;
+
     match ident.to_string().as_str() {
         "_" | "ne" | "native" => Ok(quote! { NativeEndian }),
         "le" | "little" => Ok(quote! { LittleEndian }),
         "be" | "big" => Ok(quote! { BigEndian }),
         _ => Err(Error::new_spanned(ident, "failed to determine endian")),
     }
-}
-
-fn parse_attr(attr: &Attribute) -> Result<TokenStream> {
-    let list = match attr.parse_meta()? {
-        Meta::List(list) => list,
-        other => return Err(Error::new_spanned(other, "unsupported attribute")),
-    };
-
-    let ident = only_one(list.nested.iter())
-        .and_then(|meta| match meta {
-            NestedMeta::Meta(Meta::Path(path)) => path.get_ident(),
-            _ => None,
-        })
-        .ok_or_else(|| Error::new_spanned(attr, "excepted endian"))?;
-
-    Ok(determine_endian(ident)?)
 }
 
 pub fn find<'a>(attrs: &'a [Attribute], name: &str) -> Option<&'a Attribute> {

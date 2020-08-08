@@ -1,5 +1,0 @@
-error: excepted endian
- --> $DIR/04-excepted-endian.rs:4:1
-  |
-4 | #[endian()]
-  | ^^^^^^^^^^^

@@ -1,5 +1,0 @@
-error: unsupported attribute
- --> $DIR/03-unsupported-attr.rs:4:3
-  |
-4 | #[endian]
-  |   ^^^^^^
