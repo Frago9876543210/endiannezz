@@ -33,7 +33,7 @@ pub fn derive(input: DeriveInput) -> Result<TokenStream> {
 		),
 		_ => return Err(Error::new_spanned(
 			input,
-			"CanIo can be derived only for structures",
+			"Io can be derived only for structures",
 		))
 	};
 
