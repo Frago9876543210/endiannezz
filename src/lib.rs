@@ -21,31 +21,34 @@ use std::io::Result;
 use endiannezz::{NativeEndian, LittleEndian, BigEndian, ext::{EndianReader, EndianWriter}};
 
 fn main() -> Result<()> {
-	let mut vec = Vec::new();
+    let mut vec = Vec::new();
 
-	vec.try_write::<LittleEndian, i32>(1)?;
-	vec.try_write::<BigEndian, _>(2)?;
-	vec.try_write::<NativeEndian, _>(3_u16)?;
+    vec.try_write::<LittleEndian, i32>(1)?;
+    vec.try_write::<BigEndian, _>(2)?;
+    vec.try_write::<NativeEndian, _>(3_u16)?;
 
-	let mut slice = vec.as_slice();
+    let mut slice = vec.as_slice();
 
-	slice.try_read::<LittleEndian, i32>()?;
-	let _num32: i32 = slice.try_read::<BigEndian, _>()?;
-	let _num16: u16 = slice.try_read::<NativeEndian, _>()?;
+    slice.try_read::<LittleEndian, i32>()?;
+    let _num32: i32 = slice.try_read::<BigEndian, _>()?;
+    let _num16: u16 = slice.try_read::<NativeEndian, _>()?;
 
-	Ok(())
+    Ok(())
 }
 ```
 
 You can also use this syntax:
 ```rust
+use std::io::Result;
 use endiannezz::{Endian, BigEndian, LittleEndian};
 
-fn main() {
-	let mut vec = Vec::new();
-	BigEndian::write(1, &mut vec).unwrap();
-	LittleEndian::write::<u16, _>(2, &mut vec).unwrap();
-	assert_eq!(vec.as_slice(), &[0, 0, 0, 1, 2, 0])
+fn main() -> Result<()> {
+    let mut vec = Vec::new();
+    BigEndian::write(1, &mut vec)?;
+    LittleEndian::write::<u16, _>(2, &mut vec)?;
+    assert_eq!(vec.as_slice(), &[0, 0, 0, 1, 2, 0]);
+
+    Ok(())
 }
 ```
 
@@ -59,18 +62,18 @@ struct Bytes(Vec<u8>);
 //Custom implementation of read and write
 //Use it for complex types, which can be built from primitives
 impl Io for Bytes {
-	fn write<W: Write>(&self, mut w: W) -> Result<()> {
-		w.try_write::<LittleEndian, u32>(self.0.len() as u32)?;
-		w.write_all(self.0.as_slice())?;
-		Ok(())
-	}
+    fn write<W: Write>(&self, mut w: W) -> Result<()> {
+        w.try_write::<LittleEndian, u32>(self.0.len() as u32)?;
+        w.write_all(self.0.as_slice())?;
+        Ok(())
+    }
 
-	fn read<R: Read>(mut r: R) -> Result<Self> {
-		let capacity = r.try_read::<LittleEndian, u32>()? as usize;
-		let mut vec = vec![0; capacity];
-		r.read_exact(&mut vec)?;
-		Ok(Self(vec))
-	}
+    fn read<R: Read>(mut r: R) -> Result<Self> {
+        let capacity = r.try_read::<LittleEndian, u32>()? as usize;
+        let mut vec = vec![0; capacity];
+        r.read_exact(&mut vec)?;
+        Ok(Self(vec))
+    }
 }
 
 #[derive(Io)]
@@ -80,49 +83,49 @@ impl Io for Bytes {
 // - LittleEndian: `le`, `little`
 // - BigEndian: `be`, `big`
 struct Message {
-	bytes: Bytes, //will read/write data as is (according to implementation)
-	distance: u16, //u16 in little-endian
+    bytes: Bytes, //will read/write data as is (according to implementation)
+    distance: u16, //u16 in little-endian
 
-	#[endian(big)]
-	delta: f32, //f32 in big-endian, you can override default endian!
+    #[endian(big)]
+    delta: f32, //f32 in big-endian, you can override default endian!
 
-	#[endian(native)] //machine byte order
-	machine_data: u32,
+    #[endian(native)] //machine byte order
+    machine_data: u32,
 }
 
 fn main() -> Result<()> {
-	let message = Message {
-		bytes: Bytes(vec![0xde, 0xad, 0xbe, 0xef]),
-		distance: 5,
-		delta: 2.41,
-		machine_data: 41,
-	};
+    let message = Message {
+        bytes: Bytes(vec![0xde, 0xad, 0xbe, 0xef]),
+        distance: 5,
+        delta: 2.41,
+        machine_data: 41,
+    };
 
-	//writing message into Vec
-	let mut vec = Vec::new();
-	message.write(&mut vec)?;
+    //writing message into Vec
+    let mut vec = Vec::new();
+    message.write(&mut vec)?;
 
-	//explain
-	let mut excepted = vec![
-		4, 0, 0, 0, //bytes len in little-endian
-		0xde, 0xad, 0xbe, 0xef, //buffer
-		5, 0, //distance in little-endian
-		0x40, 0x1a, 0x3d, 0x71, //delta in big-endian
-	];
+    //explain
+    let mut excepted = vec![
+        4, 0, 0, 0, //bytes len in little-endian
+        0xde, 0xad, 0xbe, 0xef, //buffer
+        5, 0, //distance in little-endian
+        0x40, 0x1a, 0x3d, 0x71, //delta in big-endian
+    ];
 
-	if cfg!(target_endian = "little") {
-		excepted.extend(&[41, 0, 0, 0]); //machine_data on little-endian CPUs
-	} else {
-		excepted.extend(&[0, 0, 0, 41]); //machine_data on big-endian CPUs
-	}
+    if cfg!(target_endian = "little") {
+        excepted.extend(&[41, 0, 0, 0]); //machine_data on little-endian CPUs
+    } else {
+        excepted.extend(&[0, 0, 0, 41]); //machine_data on big-endian CPUs
+    }
 
-	assert_eq!(vec, excepted);
+    assert_eq!(vec, excepted);
 
-	//reading message from slice
-	let mut slice = vec.as_slice();
-	let _message1 = Message::read(&mut slice)?;
+    //reading message from slice
+    let mut slice = vec.as_slice();
+    let _message1 = Message::read(&mut slice)?;
 
-	Ok(())
+    Ok(())
 }
 ```
 
@@ -162,115 +165,116 @@ pub mod ext;
 /// and allows to read types from bytes or write them into bytes
 //noinspection RsSelfConvention
 pub trait Primitive: Sized + Copy {
-	type Buf: AsRef<[u8]> + AsMut<[u8]> + Default;
+    type Buf: AsRef<[u8]> + AsMut<[u8]> + Default;
 
-	fn to_ne_bytes(self) -> Self::Buf;
-	fn to_le_bytes(self) -> Self::Buf;
-	fn to_be_bytes(self) -> Self::Buf;
+    fn to_ne_bytes(self) -> Self::Buf;
+    fn to_le_bytes(self) -> Self::Buf;
+    fn to_be_bytes(self) -> Self::Buf;
 
-	fn from_ne_bytes(bytes: Self::Buf) -> Self;
-	fn from_le_bytes(bytes: Self::Buf) -> Self;
-	fn from_be_bytes(bytes: Self::Buf) -> Self;
+    fn from_ne_bytes(bytes: Self::Buf) -> Self;
+    fn from_le_bytes(bytes: Self::Buf) -> Self;
+    fn from_be_bytes(bytes: Self::Buf) -> Self;
 }
 
 macro_rules! delegate {
-	($ty:ty, [$($method:ident),* $(,)?], ($param:ident : $param_ty:ty) -> $ret:ty) => {
-		delegate!(@inner $ty, [$($method),*], $param, $param_ty, $ret);
-	};
-	(@inner $ty:ty, [$($method:ident),*], $param:ident, $param_ty:ty, $ret:ty) => {
-		$(
-			#[inline]
-			fn $method ($param: $param_ty) -> $ret { <$ty>::$method($param) }
-		)*
-	};
+    ($ty:ty, [$($method:ident),* $(,)?], ($param:ident : $param_ty:ty) -> $ret:ty) => {
+        delegate!(@inner $ty, [$($method),*], $param, $param_ty, $ret);
+    };
+    (@inner $ty:ty, [$($method:ident),*], $param:ident, $param_ty:ty, $ret:ty) => {
+        $(
+            #[inline]
+            fn $method ($param: $param_ty) -> $ret { <$ty>::$method($param) }
+        )*
+    };
 }
 
 macro_rules! impl_primitives {
-	($($ty:ty),* $(,)?) => {
-		$(
-			impl Primitive for $ty {
-				type Buf = [u8; mem::size_of::<$ty>()];
+    ($($ty:ty),* $(,)?) => {
+        $(
+            impl Primitive for $ty {
+                type Buf = [u8; mem::size_of::<$ty>()];
 
-				delegate!($ty, [
-					to_ne_bytes,
-					to_le_bytes,
-					to_be_bytes,
-				], (self: Self) -> Self::Buf);
+                delegate!($ty, [
+                    to_ne_bytes,
+                    to_le_bytes,
+                    to_be_bytes,
+                ], (self: Self) -> Self::Buf);
 
-				delegate!($ty, [
-					from_ne_bytes,
-					from_le_bytes,
-					from_be_bytes,
-				], (bytes: Self::Buf) -> Self);
-			}
-		)*
-	};
+                delegate!($ty, [
+                    from_ne_bytes,
+                    from_le_bytes,
+                    from_be_bytes,
+                ], (bytes: Self::Buf) -> Self);
+            }
+        )*
+    };
 }
 
+#[rustfmt::skip]
 impl_primitives![
-	i8, i16, i32, i64, i128, isize,
-	u8, u16, u32, u64, u128, usize,
-	f32, f64,
+    i8, i16, i32, i64, i128, isize,
+    u8, u16, u32, u64, u128, usize,
+    f32, f64,
 ];
 
 /// Proxy for reading and writing primitive types
 pub trait Endian {
-	fn write<T: Primitive, W: Write>(primitive: T, w: W) -> Result<()>;
+    fn write<T: Primitive, W: Write>(primitive: T, w: W) -> Result<()>;
 
-	fn read<T: Primitive, R: Read>(r: R) -> Result<T>;
+    fn read<T: Primitive, R: Read>(r: R) -> Result<T>;
 }
 
 macro_rules! impl_endianness {
-	($($endian:ident $write:ident $read:ident,)*) => {
-		$(
-			pub enum $endian {}
+    ($($endian:ident $write:ident $read:ident,)*) => {
+        $(
+            pub enum $endian {}
 
-			impl Endian for $endian {
-				#[inline]
-				fn write<T: Primitive, W: Write>(primitive: T, mut w: W) -> Result<()> {
-					w.write_all(primitive.$write().as_ref())
-				}
+            impl Endian for $endian {
+                #[inline]
+                fn write<T: Primitive, W: Write>(primitive: T, mut w: W) -> Result<()> {
+                    w.write_all(primitive.$write().as_ref())
+                }
 
-				#[inline]
-				fn read<T: Primitive, R: Read>(mut r: R) -> Result<T> {
-					let mut buf = T::Buf::default();
-					r.read_exact(&mut buf.as_mut())?;
-					Ok(T::$read(buf))
-				}
-			}
-		)*
-	};
+                #[inline]
+                fn read<T: Primitive, R: Read>(mut r: R) -> Result<T> {
+                    let mut buf = T::Buf::default();
+                    r.read_exact(&mut buf.as_mut())?;
+                    Ok(T::$read(buf))
+                }
+            }
+        )*
+    };
 }
 
 impl_endianness![
-	NativeEndian to_ne_bytes from_ne_bytes,
-	LittleEndian to_le_bytes from_le_bytes,
-	BigEndian    to_be_bytes from_be_bytes,
+    NativeEndian to_ne_bytes from_ne_bytes,
+    LittleEndian to_le_bytes from_le_bytes,
+    BigEndian    to_be_bytes from_be_bytes,
 ];
 
 /// Allows the type to be encoded/decoded using binary format
 pub trait Io: Sized {
-	fn write<W: Write>(&self, w: W) -> Result<()>;
+    fn write<W: Write>(&self, w: W) -> Result<()>;
 
-	fn read<R: Read>(r: R) -> Result<Self>;
+    fn read<R: Read>(r: R) -> Result<Self>;
 }
 
 /// Binary representation of a bool
 impl Io for bool {
-	#[cfg_attr(feature = "inline_primitives", inline)]
-	fn write<W: Write>(&self, mut w: W) -> Result<()> {
-		w.try_write::<NativeEndian, u8>(if *self { 1 } else { 0 })
-	}
+    #[cfg_attr(feature = "inline_primitives", inline)]
+    fn write<W: Write>(&self, mut w: W) -> Result<()> {
+        w.try_write::<NativeEndian, u8>(if *self { 1 } else { 0 })
+    }
 
-	#[cfg_attr(feature = "inline_primitives", inline)]
-	fn read<R: Read>(mut r: R) -> Result<Self> {
-		match r.try_read::<NativeEndian, u8>()? {
-			0 => Ok(false),
-			1 => Ok(true),
-			_ => Err(Error::new(
-				ErrorKind::Other,
-				"Received invalid value for bool",
-			)),
-		}
-	}
+    #[cfg_attr(feature = "inline_primitives", inline)]
+    fn read<R: Read>(mut r: R) -> Result<Self> {
+        match r.try_read::<NativeEndian, u8>()? {
+            0 => Ok(false),
+            1 => Ok(true),
+            _ => Err(Error::new(
+                ErrorKind::Other,
+                "Received invalid value for bool",
+            )),
+        }
+    }
 }
