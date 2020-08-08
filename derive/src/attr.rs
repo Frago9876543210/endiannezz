@@ -10,7 +10,7 @@ fn only_one<I: Iterator<Item = T>, T>(mut it: I) -> Option<T> {
     }
 }
 
-fn parse_attr(attr: &Attribute) -> Result<TokenStream> {
+fn parse_endian_attr(attr: &Attribute) -> Result<TokenStream> {
     let ident = attr.parse_args::<Ident>()?;
 
     match ident.to_string().as_str() {
@@ -25,12 +25,12 @@ pub fn find<'a>(attrs: &'a [Attribute], name: &str) -> Option<&'a Attribute> {
     only_one(attrs.iter().filter(|attr| attr.path.is_ident(name)))
 }
 
-pub fn parse(attrs: &[Attribute]) -> Result<Option<TokenStream>> {
-    find(attrs, "endian").map(parse_attr).transpose()
+pub fn parse_endian(attrs: &[Attribute]) -> Result<Option<TokenStream>> {
+    find(attrs, "endian").map(parse_endian_attr).transpose()
 }
 
 pub fn get_endian(attrs: &[Attribute], default: TokenStream) -> Result<TokenStream> {
-    match parse(attrs)? {
+    match parse_endian(attrs)? {
         Some(attr) if default.to_string() == attr.to_string() => Err(Error::new_spanned(
             attrs.first(),
             "this attribute does not make sense",

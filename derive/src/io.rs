@@ -10,7 +10,7 @@ pub fn derive(input: DeriveInput) -> Result<TokenStream> {
 
     let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
 
-    let default = attr::parse(&input.attrs)?
+    let default = attr::parse_endian(&input.attrs)?
         .ok_or_else(|| Error::new_spanned(&input, "please specify default endian"))?;
 
     let imports = quote! {
