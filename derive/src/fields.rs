@@ -4,7 +4,7 @@ use syn::{Fields, Result, Type};
 
 use quote::quote;
 
-use crate::attr;
+use crate::attr::endian;
 
 pub fn write<Named, Unnamed>(
     fields: &Fields,
@@ -22,7 +22,7 @@ where
         Fields::Named(fields) => {
             for field in &fields.named {
                 let accessor = access_named(field.ident.as_ref());
-                let endian = attr::get_endian(&field.attrs, default_endian.clone())?;
+                let endian = endian::choice(&field.attrs, default_endian.clone())?;
 
                 derived.push(write_field(&accessor, &endian)?);
             }
@@ -30,7 +30,7 @@ where
         Fields::Unnamed(fields) => {
             for (i, field) in fields.unnamed.iter().enumerate() {
                 let accessor = access_unnamed(i, field.span());
-                let endian = attr::get_endian(&field.attrs, default_endian.clone())?;
+                let endian = endian::choice(&field.attrs, default_endian.clone())?;
 
                 derived.push(write_field(&accessor, &endian)?);
             }
@@ -54,7 +54,7 @@ pub fn read(fields: &Fields, default_endian: &TokenStream) -> Result<TokenStream
         Fields::Named(fields) => {
             for field in &fields.named {
                 let ident = field.ident.as_ref();
-                let endian = attr::get_endian(&field.attrs, default_endian.clone())?;
+                let endian = endian::choice(&field.attrs, default_endian.clone())?;
 
                 let read = read_field(&field.ty, &endian)?;
 
@@ -64,7 +64,7 @@ pub fn read(fields: &Fields, default_endian: &TokenStream) -> Result<TokenStream
         }
         Fields::Unnamed(fields) => {
             for field in &fields.unnamed {
-                let endian = attr::get_endian(&field.attrs, default_endian.clone())?;
+                let endian = endian::choice(&field.attrs, default_endian.clone())?;
 
                 derived.push(read_field(&field.ty, &endian)?);
             }
