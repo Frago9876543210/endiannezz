@@ -1,5 +1,5 @@
-error: expected attribute arguments in parentheses: #[endian(...)]
- --> $DIR/03-expected-attr-args.rs:4:1
+error: expected attribute arguments
+ --> $DIR/03-expected-attr-args.rs:4:3
   |
 4 | #[endian]
-  | ^^^^^^^^^
+  |   ^^^^^^

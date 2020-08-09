@@ -1,5 +1,5 @@
-error: unexpected end of input, expected identifier
- --> $DIR/04-excepted-endian-identifier.rs:4:10
+error: excepted endian identifier
+ --> $DIR/04-excepted-endian-identifier.rs:4:1
   |
 4 | #[endian()]
-  |          ^
+  | ^^^^^^^^^^^
