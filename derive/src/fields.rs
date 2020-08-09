@@ -38,7 +38,7 @@ where
         Fields::Unit => {}
     }
 
-    Ok(quote! { #(#derived)* })
+    Ok(quote!(#(#derived)*))
 }
 
 fn write_field(name: &TokenStream, endian: &TokenStream) -> Result<TokenStream> {
@@ -58,7 +58,7 @@ pub fn read(fields: &Fields, default_endian: &TokenStream) -> Result<TokenStream
 
                 let read = read_field(&field.ty, &endian)?;
 
-                derived.push(quote! { #ident: #read });
+                derived.push(quote!(#ident: #read));
             }
             quote!({ #(#derived),* })
         }
@@ -68,9 +68,9 @@ pub fn read(fields: &Fields, default_endian: &TokenStream) -> Result<TokenStream
 
                 derived.push(read_field(&field.ty, &endian)?);
             }
-            quote! { ( #(#derived),* ) }
+            quote!(( #(#derived),* ))
         }
-        Fields::Unit => quote! {},
+        Fields::Unit => quote!(),
     })
 }
 

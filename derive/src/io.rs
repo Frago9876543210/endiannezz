@@ -22,7 +22,7 @@ pub fn derive(input: DeriveInput) -> Result<TokenStream> {
         Data::Struct(data) => {
             let write = fields::write(
                 &data.fields,
-                |ident| quote! { self.#ident },
+                |ident| quote!(self.#ident),
                 |i, _| {
                     let i = Literal::usize_unsuffixed(i);
                     quote!(self.#i)

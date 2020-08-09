@@ -9,9 +9,9 @@ fn parse_endian_attr(attr: &Attribute) -> Result<TokenStream> {
     let ident = attr.parse_args::<Ident>()?;
 
     match ident.to_string().as_str() {
-        "_" | "ne" | "native" => Ok(quote! { NativeEndian }),
-        "le" | "little" => Ok(quote! { LittleEndian }),
-        "be" | "big" => Ok(quote! { BigEndian }),
+        "_" | "ne" | "native" => Ok(quote!(NativeEndian)),
+        "le" | "little" => Ok(quote!(LittleEndian)),
+        "be" | "big" => Ok(quote!(BigEndian)),
         _ => Err(Error::new_spanned(ident, "failed to determine endian")),
     }
 }
