@@ -10,7 +10,7 @@ struct ParseMe {
 }
 
 #[test]
-fn basic() {
+fn regular_struct() {
     let s1 = ParseMe {
         works: true,
         data: 10,
