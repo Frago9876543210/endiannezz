@@ -13,7 +13,6 @@ readme = "README.md"
 
 [dev-dependencies]
 trybuild = "1.0"
-rustversion = "1.0"
 
 [dependencies]
 endiannezz_derive = { version = "=0.1.1", path = "derive", optional = true }
