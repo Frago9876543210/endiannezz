@@ -19,8 +19,8 @@ pub fn derive(input: DeriveInput) -> Result<TokenStream> {
     };
 
     let (write, read) = match &input.data {
-        Data::Struct(data) => (
-            fields::write(
+        Data::Struct(data) => {
+            let write = fields::write(
                 &data.fields,
                 |ident| quote! { self.#ident },
                 |i, _| {
@@ -28,9 +28,11 @@ pub fn derive(input: DeriveInput) -> Result<TokenStream> {
                     quote!(self.#i)
                 },
                 &default,
-            )?,
-            fields::read(&data.fields, &default)?,
-        ),
+            )?;
+            let read = fields::read(&data.fields, &default)?;
+
+            (write, quote!(Self #read))
+        }
         _ => {
             return Err(Error::new_spanned(
                 input,
@@ -50,7 +52,7 @@ pub fn derive(input: DeriveInput) -> Result<TokenStream> {
 
             fn read<R: ::std::io::Read>(mut r: R) -> ::std::io::Result<Self> {
                 #imports
-                Ok(Self #read)
+                Ok(#read)
             }
         }
     })
