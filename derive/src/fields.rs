@@ -85,8 +85,12 @@ pub fn generate_pattern(i: usize) -> Ident {
 
 pub fn make_patterns(fields: &Fields) -> TokenStream {
     match fields {
+        #[rustfmt::skip]
         Fields::Named(fields) => {
-            let fields = fields.named.iter().map(|field| field.ident.as_ref());
+            let fields = fields
+                .named
+                .iter()
+                .filter_map(|field| field.ident.as_ref());
             quote!({ #(#fields),* })
         }
         Fields::Unnamed(fields) => {
