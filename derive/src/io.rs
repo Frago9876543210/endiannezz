@@ -94,7 +94,7 @@ pub fn derive(input: DeriveInput) -> Result<TokenStream> {
                 let id = #repr_read(r)?;
                 match id {
                     #(#read_vars,)*
-                    _ => Err(::std::io::Error::new(::std::io::ErrorKind::Other, format!("Unexpected enum variant {:?}", id)))?,
+                    _ => Err(::std::io::Error::new(::std::io::ErrorKind::InvalidData, id))?,
                 }
             }};
 
