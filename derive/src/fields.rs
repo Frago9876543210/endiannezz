@@ -9,7 +9,7 @@ pub fn write<Named, Unnamed>(
     fields: &Fields,
     access_named: Named,
     access_unnamed: Unnamed,
-    default_endian: &TokenStream,
+    default_endian: &Ident,
 ) -> Result<TokenStream>
 where
     Named: Fn(Option<&Ident>) -> TokenStream,
@@ -21,17 +21,21 @@ where
         Fields::Named(fields) => {
             for field in &fields.named {
                 let accessor = access_named(field.ident.as_ref());
-                let endian = endian::choice(&field.attrs, default_endian.clone())?;
+                let attribute = endian::parse(&field.attrs)?;
+                let endian =
+                    endian::choice(field.attrs.first(), attribute.as_ref(), default_endian)?;
 
-                derived.push(write_field(&accessor, &endian)?);
+                derived.push(write_field(&accessor, &endian));
             }
         }
         Fields::Unnamed(fields) => {
             for (i, field) in fields.unnamed.iter().enumerate() {
                 let accessor = access_unnamed(i);
-                let endian = endian::choice(&field.attrs, default_endian.clone())?;
+                let attribute = endian::parse(&field.attrs)?;
+                let endian =
+                    endian::choice(field.attrs.first(), attribute.as_ref(), default_endian)?;
 
-                derived.push(write_field(&accessor, &endian)?);
+                derived.push(write_field(&accessor, &endian));
             }
         }
         Fields::Unit => {}
@@ -40,22 +44,24 @@ where
     Ok(quote!(#(#derived)*))
 }
 
-fn write_field(name: &TokenStream, endian: &TokenStream) -> Result<TokenStream> {
-    Ok(quote! {
+fn write_field(name: &TokenStream, endian: &Ident) -> TokenStream {
+    quote! {
         #name.write_hacked::<::endiannezz::#endian, _>(&mut w)?;
-    })
+    }
 }
 
-pub fn read(fields: &Fields, default_endian: &TokenStream) -> Result<TokenStream> {
+pub fn read(fields: &Fields, default_endian: &Ident) -> Result<TokenStream> {
     let mut derived = Vec::new();
 
     Ok(match fields {
         Fields::Named(fields) => {
             for field in &fields.named {
                 let ident = field.ident.as_ref();
-                let endian = endian::choice(&field.attrs, default_endian.clone())?;
+                let attribute = endian::parse(&field.attrs)?;
+                let endian =
+                    endian::choice(field.attrs.first(), attribute.as_ref(), default_endian)?;
 
-                let read = read_field(&field.ty, &endian)?;
+                let read = read_field(&field.ty, &endian);
 
                 derived.push(quote!(#ident: #read));
             }
@@ -63,9 +69,11 @@ pub fn read(fields: &Fields, default_endian: &TokenStream) -> Result<TokenStream
         }
         Fields::Unnamed(fields) => {
             for field in &fields.unnamed {
-                let endian = endian::choice(&field.attrs, default_endian.clone())?;
+                let attribute = endian::parse(&field.attrs)?;
+                let endian =
+                    endian::choice(field.attrs.first(), attribute.as_ref(), default_endian)?;
 
-                derived.push(read_field(&field.ty, &endian)?);
+                derived.push(read_field(&field.ty, &endian));
             }
             quote!(( #(#derived),* ))
         }
@@ -73,10 +81,10 @@ pub fn read(fields: &Fields, default_endian: &TokenStream) -> Result<TokenStream
     })
 }
 
-fn read_field(ty: &Type, endian: &TokenStream) -> Result<TokenStream> {
-    Ok(quote! {
+fn read_field(ty: &Type, endian: &Ident) -> TokenStream {
+    quote! {
         #ty::read_hacked::<::endiannezz::#endian, _>(&mut r)?
-    })
+    }
 }
 
 pub fn generate_pattern(i: usize) -> Ident {
