@@ -1,0 +1,9 @@
+error: Unsupported repr type
+ --> $DIR/09-unsupported-repr.rs:5:1
+  |
+5 | / #[repr(C)]
+6 | | enum Foo {
+7 | |     Bar,
+8 | |     Baz,
+9 | | }
+  | |_^

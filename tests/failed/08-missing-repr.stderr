@@ -1,0 +1,9 @@
+error: Enums must declare #[repr]
+ --> $DIR/08-missing-repr.rs:4:1
+  |
+4 | / #[endian(big)]
+5 | | enum Foo {
+6 | |     Bar,
+7 | |     Baz,
+8 | | }
+  | |_^
