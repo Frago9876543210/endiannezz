@@ -1,8 +1,7 @@
-use proc_macro2::{Ident, Span, TokenStream};
-use syn::spanned::Spanned;
+use proc_macro2::{Ident, TokenStream};
 use syn::{Fields, Result, Type};
 
-use quote::quote;
+use quote::{format_ident, quote};
 
 use crate::attr::endian;
 
@@ -14,7 +13,7 @@ pub fn write<Named, Unnamed>(
 ) -> Result<TokenStream>
 where
     Named: Fn(Option<&Ident>) -> TokenStream,
-    Unnamed: Fn(usize, Span) -> TokenStream,
+    Unnamed: Fn(usize) -> TokenStream,
 {
     let mut derived = Vec::new();
 
@@ -29,7 +28,7 @@ where
         }
         Fields::Unnamed(fields) => {
             for (i, field) in fields.unnamed.iter().enumerate() {
-                let accessor = access_unnamed(i, field.span());
+                let accessor = access_unnamed(i);
                 let endian = endian::choice(&field.attrs, default_endian.clone())?;
 
                 derived.push(write_field(&accessor, &endian)?);
@@ -78,4 +77,26 @@ fn read_field(ty: &Type, endian: &TokenStream) -> Result<TokenStream> {
     Ok(quote! {
         #ty::read_hacked::<::endiannezz::#endian, _>(&mut r)?
     })
+}
+
+pub fn generate_pattern(i: usize) -> Ident {
+    format_ident!("variant_{}", i)
+}
+
+pub fn make_patterns(fields: &Fields) -> TokenStream {
+    match fields {
+        Fields::Named(fields) => {
+            let fields = fields.named.iter().map(|field| field.ident.as_ref());
+            quote!({ #(#fields),* })
+        }
+        Fields::Unnamed(fields) => {
+            let fields = fields
+                .unnamed
+                .iter()
+                .enumerate()
+                .map(|(i, _)| generate_pattern(i));
+            quote!(( #(#fields),* ))
+        }
+        Fields::Unit => quote!(),
+    }
 }
