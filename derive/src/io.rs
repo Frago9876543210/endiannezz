@@ -91,10 +91,9 @@ pub fn derive(input: DeriveInput) -> Result<TokenStream> {
             let read = quote! {{
                 use ::endiannezz::Endian;
 
-                let id = #repr_read(r)?;
-                match id {
+                match #repr_read(r)? {
                     #(#read_vars,)*
-                    _ => Err(::std::io::Error::new(::std::io::ErrorKind::InvalidData, id))?,
+                    _ => Err(::std::io::Error::from(::std::io::ErrorKind::InvalidData))?,
                 }
             }};
 
