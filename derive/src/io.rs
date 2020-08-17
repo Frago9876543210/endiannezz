@@ -1,5 +1,5 @@
-use proc_macro2::{Literal, TokenStream};
-use syn::{Data, DeriveInput, Error, Result};
+use proc_macro2::{Ident, Literal, TokenStream};
+use syn::{Data, DeriveInput, Error, Fields, Result};
 
 use quote::quote;
 
@@ -15,7 +15,7 @@ pub fn derive(input: DeriveInput) -> Result<TokenStream> {
 
     let imports = quote! {
         #[allow(unused_imports)]
-        use ::endiannezz::internal::{HackedIo, HackedPrimitive};
+        use ::endiannezz::{Endian, internal::{HackedIo, HackedPrimitive}};
     };
 
     let (write, read) = match &input.data {
@@ -23,7 +23,7 @@ pub fn derive(input: DeriveInput) -> Result<TokenStream> {
             let write = fields::write(
                 &data.fields,
                 |ident| quote!(self.#ident),
-                |i, _| {
+                |i| {
                     let i = Literal::usize_unsuffixed(i);
                     quote!(self.#i)
                 },
@@ -33,10 +33,84 @@ pub fn derive(input: DeriveInput) -> Result<TokenStream> {
 
             (write, quote!(Self #read))
         }
+        Data::Enum(data) => {
+            let repr_attr = attr::find(&input.attrs, "repr")
+                .ok_or_else(|| Error::new_spanned(&input, "Enums must declare #[repr]"))?;
+            let repr_ty = repr_attr.parse_args::<Ident>()?;
+
+            if !repr_ty.to_string().starts_with(|c| matches!(c, 'u' | 'i')) {
+                return Err(Error::new_spanned(&input, "Unsupported repr type"));
+            }
+
+            let capacity = data.variants.len();
+
+            let (mut write_vars, mut read_vars) =
+                (Vec::with_capacity(capacity), Vec::with_capacity(capacity));
+
+            let (repr_write, repr_read) = (
+                quote!(::endiannezz::#default::write::<#repr_ty, _>),
+                quote!(::endiannezz::#default::read::<#repr_ty, _>),
+            );
+
+            let cloneable = data
+                .variants
+                .iter()
+                .all(|v| matches!(&v.fields, Fields::Unit));
+
+            for variant in &data.variants {
+                let variant_name = &variant.ident;
+
+                let (_, discriminant) = variant.discriminant.as_ref().ok_or_else(|| {
+                    Error::new_spanned(
+                        variant,
+                        "All enum variants must have explicit discriminants",
+                    )
+                })?;
+
+                let fields_patterns = fields::make_patterns(&variant.fields);
+                let fields_write = fields::write(
+                    &variant.fields,
+                    |ident| quote!(#ident),
+                    |i| {
+                        let ident = fields::generate_pattern(i);
+                        quote!(#ident)
+                    },
+                    &default,
+                )?;
+                let fields_read = fields::read(&variant.fields, &default)?;
+
+                write_vars.push(quote!(Self::#variant_name #fields_patterns => {
+                    #repr_write(#discriminant, &mut w)?;
+                    #fields_write
+                }));
+                read_vars.push(quote!(#discriminant => Self::#variant_name #fields_read));
+            }
+
+            let write = if cloneable {
+                quote! {
+                    #repr_write(*self as #repr_ty, &mut w)?;
+                }
+            } else {
+                quote! {
+                    match self {
+                        #(#write_vars),*
+                    }
+                }
+            };
+
+            let read = quote! {{
+                match #repr_read(&mut r)? {
+                    #(#read_vars,)*
+                    _ => Err(::std::io::Error::from(::std::io::ErrorKind::InvalidData))?,
+                }
+            }};
+
+            (write, read)
+        }
         _ => {
             return Err(Error::new_spanned(
                 input,
-                "Io can be derived only for structures",
+                "Io can be derived only for structures and enums (in nightly version)",
             ));
         }
     };

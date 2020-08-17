@@ -1,0 +1,5 @@
+error: All enum variants must have explicit discriminants
+ --> $DIR/10-explicit-discriminant.rs:8:5
+  |
+8 |     Baz,
+  |     ^^^
