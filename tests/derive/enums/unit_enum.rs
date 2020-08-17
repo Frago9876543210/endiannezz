@@ -1,6 +1,6 @@
 use endiannezz::Io;
 
-#[derive(Io, Debug, PartialEq)]
+#[derive(Io, Debug, PartialEq, Copy, Clone)]
 #[endian(little)]
 #[repr(u32)]
 enum Foo {

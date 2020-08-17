@@ -1,5 +1,5 @@
 use proc_macro2::{Ident, Literal, TokenStream};
-use syn::{Data, DeriveInput, Error, Result};
+use syn::{Data, DeriveInput, Error, Fields, Result};
 
 use quote::quote;
 
@@ -52,6 +52,11 @@ pub fn derive(input: DeriveInput) -> Result<TokenStream> {
                 quote!(::endiannezz::#default::read::<#repr_ty, _>),
             );
 
+            let cloneable = data
+                .variants
+                .iter()
+                .all(|v| matches!(&v.fields, Fields::Unit));
+
             for variant in &data.variants {
                 let variant_name = &variant.ident;
 
@@ -81,11 +86,18 @@ pub fn derive(input: DeriveInput) -> Result<TokenStream> {
                 read_vars.push(quote!(#discriminant => Self::#variant_name #fields_read));
             }
 
-            let write = quote! {
-                match self {
-                    #(#write_vars),*
+            let write = if cloneable {
+                quote! {
+                    #repr_write(*self as #repr_ty, &mut w)?;
+                }
+            } else {
+                quote! {
+                    match self {
+                        #(#write_vars),*
+                    }
                 }
             };
+
             let read = quote! {{
                 match #repr_read(&mut r)? {
                     #(#read_vars,)*
