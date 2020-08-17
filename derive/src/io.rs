@@ -15,7 +15,7 @@ pub fn derive(input: DeriveInput) -> Result<TokenStream> {
 
     let imports = quote! {
         #[allow(unused_imports)]
-        use ::endiannezz::internal::{HackedIo, HackedPrimitive};
+        use ::endiannezz::{Endian, internal::{HackedIo, HackedPrimitive}};
     };
 
     let (write, read) = match &input.data {
@@ -75,8 +75,6 @@ pub fn derive(input: DeriveInput) -> Result<TokenStream> {
                 let fields_read = fields::read(&variant.fields, &default)?;
 
                 write_vars.push(quote!(Self::#variant_name #fields_patterns => {
-                    use ::endiannezz::Endian;
-
                     #repr_write(#discriminant, &mut w)?;
                     #fields_write
                 }));
@@ -89,8 +87,6 @@ pub fn derive(input: DeriveInput) -> Result<TokenStream> {
                 }
             };
             let read = quote! {{
-                use ::endiannezz::Endian;
-
                 match #repr_read(&mut r)? {
                     #(#read_vars,)*
                     _ => Err(::std::io::Error::from(::std::io::ErrorKind::InvalidData))?,
