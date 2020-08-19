@@ -271,10 +271,7 @@ impl Io for bool {
         match r.try_read::<NativeEndian, u8>()? {
             0 => Ok(false),
             1 => Ok(true),
-            _ => Err(Error::new(
-                ErrorKind::Other,
-                "Received invalid value for bool",
-            )),
+            _ => Err(Error::from(ErrorKind::InvalidData)),
         }
     }
 }
