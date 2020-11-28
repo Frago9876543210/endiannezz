@@ -77,7 +77,7 @@ impl Io for Bytes {
 }
 
 #[derive(Io)]
-#[endian(little)] //default endian for for fields of struct (except custom impl, such as Bytes)
+#[endian(little)] //default endian for fields of struct (except custom impl, such as Bytes)
 //There are 3 types of endianness and they can be written in the `#[endian]` attribute as follows:
 // - NativeEndian: `_`, `ne`, `native`
 // - LittleEndian: `le`, `little`
