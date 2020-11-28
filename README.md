@@ -9,7 +9,7 @@ Zero dependencies library for I/O endianness on high-level
 ### Installing
 ```toml
 [dependencies]
-endiannezz = "0.5"
+endiannezz = "0.6"
 ```
 ### Using `#[derive(Io)]`
 ```rust
