@@ -24,11 +24,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Check for ~/.cargo cache
+      - name: Cargo cache
         uses: actions/cache@v2
         with:
           path: ~/.cargo
-          key: ${{ runner.os }}-cargo-${{ hashFiles('Cargo.toml') }}
+          key: ${{ runner.os }}-${{ matrix.toolchain }}-cargo-${{ hashFiles('Cargo.toml') }}
 
       - name: Setup ${{ matrix.toolchain }} toolchain
         uses: actions-rs/toolchain@v1
