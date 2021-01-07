@@ -285,15 +285,18 @@ impl Io for bool {
 pub trait HardcodedPayload: Default {
     type Buf: FixedSizeArray<u8> + Default + PartialEq;
     const PAYLOAD: Self::Buf;
+}
 
+#[cfg(unstable_feature)]
+impl<T: HardcodedPayload> Io for T {
     #[cfg_attr(feature = "inline_primitives", inline)]
-    fn write_spec<W: Write>(&self, mut w: W) -> Result<()> {
+    default fn write<W: Write>(&self, mut w: W) -> Result<()> {
         w.write_all(Self::PAYLOAD.as_slice())
     }
 
     #[cfg_attr(feature = "inline_primitives", inline)]
-    fn read_spec<R: Read>(mut r: R) -> Result<Self> {
-        let mut payload = Self::Buf::default();
+    default fn read<R: Read>(mut r: R) -> Result<Self> {
+        let mut payload = T::Buf::default();
 
         r.read_exact(payload.as_mut_slice())?;
         if payload == Self::PAYLOAD {
@@ -301,18 +304,5 @@ pub trait HardcodedPayload: Default {
         } else {
             Err(Error::from(ErrorKind::InvalidData))
         }
-    }
-}
-
-#[cfg(unstable_feature)]
-impl<T: HardcodedPayload> Io for T {
-    #[cfg_attr(feature = "inline_primitives", inline)]
-    default fn write<W: Write>(&self, w: W) -> Result<()> {
-        T::write_spec::<W>(self, w)
-    }
-
-    #[cfg_attr(feature = "inline_primitives", inline)]
-    default fn read<R: Read>(r: R) -> Result<Self> {
-        T::read_spec(r)
     }
 }
