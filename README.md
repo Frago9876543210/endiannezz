@@ -1,6 +1,6 @@
 endiannezz
 ==========
-[![Build Status](https://travis-ci.org/Frago9876543210/endiannezz.svg?branch=master)](https://travis-ci.org/Frago9876543210/endiannezz)
+[![Build Status](https://github.com/Frago9876543210/endiannezz/workflows/CI/badge.svg)](https://github.com/Frago9876543210/endiannezz/actions)
 [![Latest Version](https://img.shields.io/crates/v/endiannezz.svg)](https://crates.io/crates/endiannezz)
 [![Documentation](https://docs.rs/endiannezz/badge.svg)](https://docs.rs/endiannezz/)
 
