@@ -5,6 +5,9 @@ on:
   pull_request:
   workflow_dispatch:
 
+env:
+  CARGO_TERM_COLOR: always
+
 jobs:
   build:
     name: Build project
@@ -18,18 +21,28 @@ jobs:
           - nightly
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-      - uses: actions-rs/toolchain@v1
+      - name: Check for ~/.cargo cache
+        uses: actions/cache@v2
+        with:
+          path: ~/.cargo
+          key: ${{ runner.os }}-cargo-${{ hashFiles('Cargo.toml') }}
+
+      - name: Setup ${{ matrix.toolchain }} toolchain
+        uses: actions-rs/toolchain@v1
         with:
           toolchain: ${{ matrix.toolchain }}
 
-      - uses: actions-rs/cargo@v1
+      - name: Cargo build
+        uses: actions-rs/cargo@v1
         with:
           command: build
           args: --verbose
 
-      - uses: actions-rs/cargo@v1
+      - name: Cargo test
+        uses: actions-rs/cargo@v1
         with:
           command: test
           args: --verbose
