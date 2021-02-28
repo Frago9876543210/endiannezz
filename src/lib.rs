@@ -1,5 +1,3 @@
-#![cfg_attr(unstable_feature, feature(min_specialization, fixed_size_array))]
-
 /*!
 This crate provides the ability to encode and decode all primitive types into [different endianness]
 
@@ -157,9 +155,6 @@ use crate::ext::{EndianReader, EndianWriter};
 #[cfg(feature = "derive")]
 pub mod internal;
 
-#[cfg(unstable_feature)]
-use std::array::FixedSizeArray;
-
 /// Provides extensions for [`Read`] and [`Write`] traits
 ///
 /// [`Read`]: https://doc.rust-lang.org/std/io/trait.Read.html
@@ -281,24 +276,22 @@ impl Io for bool {
     }
 }
 
-#[cfg(unstable_feature)]
 pub trait HardcodedPayload: Default {
-    type Buf: FixedSizeArray<u8> + Default + PartialEq;
+    type Buf: AsRef<[u8]> + AsMut<[u8]> + Default + PartialEq;
     const PAYLOAD: Self::Buf;
 }
 
-#[cfg(unstable_feature)]
 impl<T: HardcodedPayload> Io for T {
     #[cfg_attr(feature = "inline_primitives", inline)]
-    default fn write<W: Write>(&self, mut w: W) -> Result<()> {
-        w.write_all(Self::PAYLOAD.as_slice())
+    fn write<W: Write>(&self, mut w: W) -> Result<()> {
+        w.write_all(Self::PAYLOAD.as_ref())
     }
 
     #[cfg_attr(feature = "inline_primitives", inline)]
-    default fn read<R: Read>(mut r: R) -> Result<Self> {
+    fn read<R: Read>(mut r: R) -> Result<Self> {
         let mut payload = T::Buf::default();
 
-        r.read_exact(payload.as_mut_slice())?;
+        r.read_exact(payload.as_mut())?;
         if payload == Self::PAYLOAD {
             Ok(Self::default())
         } else {
