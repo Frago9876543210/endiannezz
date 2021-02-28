@@ -39,7 +39,7 @@ pub fn derive(input: DeriveInput) -> Result<TokenStream> {
             let repr_ty = repr_attr.parse_args::<Ident>()?;
 
             if !repr_ty.to_string().starts_with(|c| matches!(c, 'u' | 'i')) {
-                return Err(Error::new_spanned(&input, "Unsupported repr type"));
+                return Err(Error::new_spanned(&repr_attr, "Unsupported repr type"));
             }
 
             let capacity = data.variants.len();
