@@ -268,7 +268,14 @@ impl Io for bool {
 
     #[cfg_attr(feature = "inline_primitives", inline)]
     fn read<R: Read>(mut r: R) -> Result<Self> {
-        match r.try_read::<NativeEndian, u8>()? {
+        let byte = r.try_read::<NativeEndian, u8>()?;
+        #[cfg(feature = "unchecked_bool")]
+        {
+            Ok(byte != 0)
+        }
+
+        #[cfg(not(feature = "unchecked_bool"))]
+        match byte {
             0 => Ok(false),
             1 => Ok(true),
             _ => Err(Error::from(ErrorKind::InvalidData)),

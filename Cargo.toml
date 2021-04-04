@@ -1,6 +1,6 @@
 [package]
 name = "endiannezz"
-version = "0.6.3"
+version = "0.6.4"
 authors = ["Frago9876543210"]
 edition = "2018"
 license = "MIT"
@@ -30,3 +30,5 @@ derive = ["endiannezz_derive"]
 inline_primitives = []
 #NOTE: It may increase size of binary is some cases.
 inline_io = []
+#C-like bool: 0 - false, else - true
+unchecked_bool = []
