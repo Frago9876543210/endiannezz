@@ -17,8 +17,9 @@ Now it's possible to have traits that expand [`Read`] and [`Write`] with new met
 
 # Simple example
 ```rust
+use endiannezz::ext::{EndianReader, EndianWriter};
+use endiannezz::{BigEndian, LittleEndian, NativeEndian};
 use std::io::Result;
-use endiannezz::{NativeEndian, LittleEndian, BigEndian, ext::{EndianReader, EndianWriter}};
 
 fn main() -> Result<()> {
     let mut vec = Vec::new();
@@ -39,8 +40,8 @@ fn main() -> Result<()> {
 
 You can also use this syntax:
 ```rust
+use endiannezz::{BigEndian, Endian, LittleEndian};
 use std::io::Result;
-use endiannezz::{Endian, BigEndian, LittleEndian};
 
 fn main() -> Result<()> {
     let mut vec = Vec::new();
@@ -54,8 +55,9 @@ fn main() -> Result<()> {
 
 # Using `#[derive(Io)]` to describe complex binary formats
 ```rust
+use endiannezz::ext::{EndianReader, EndianWriter};
+use endiannezz::{Io, LittleEndian};
 use std::io::{Read, Result, Write};
-use endiannezz::{ext::{EndianReader, EndianWriter}, Io, LittleEndian};
 
 struct Bytes(Vec<u8>);
 
@@ -77,19 +79,24 @@ impl Io for Bytes {
 }
 
 #[derive(Io)]
-#[endian(little)] //default endian for fields of struct (except custom impl, such as Bytes)
+//default endian for fields of struct (except custom impl, such as Bytes)
+#[endian(little)]
 //There are 3 types of endianness and they can be written in the `#[endian]` attribute as follows:
 // - NativeEndian: `_`, `ne`, `native`
 // - LittleEndian: `le`, `little`
 // - BigEndian: `be`, `big`
 struct Message {
-    bytes: Bytes, //will read/write data as is (according to implementation)
-    distance: u16, //u16 in little-endian
+    //will read/write data as is (according to implementation)
+    bytes: Bytes,
+    //u16 in little-endian
+    distance: u16,
 
+    //f32 in big-endian, you can override default endian!
     #[endian(big)]
-    delta: f32, //f32 in big-endian, you can override default endian!
+    delta: f32,
 
-    #[endian(native)] //machine byte order
+    //machine byte order
+    #[endian(native)]
     machine_data: u32,
 }
 

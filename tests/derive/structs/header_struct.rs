@@ -1,4 +1,4 @@
-use endiannezz::{Io, HardcodedPayload};
+use endiannezz::{HardcodedPayload, Io};
 
 #[derive(Debug, Default, PartialEq)]
 struct Header;

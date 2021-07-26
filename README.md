@@ -13,8 +13,8 @@ endiannezz = "0.6"
 ```
 ### Using `#[derive(Io)]`
 ```rust
-use std::io::Result;
 use endiannezz::Io;
+use std::io::Result;
 
 #[derive(Io)]
 #[endian(big)]
@@ -37,6 +37,7 @@ fn main() -> Result<()> {
     s1.write(&mut vec)?;
 
     let mut slice = vec.as_slice();
+    #[rustfmt::skip]
     assert_eq!(slice, &[
         1, //bool as byte
         0, 0, 0, 10, //u32 in big-endian (because big-endian is set on top place struct as default)
@@ -52,8 +53,9 @@ fn main() -> Result<()> {
 
 ### Simple example
 ```rust
+use endiannezz::ext::{EndianReader, EndianWriter};
+use endiannezz::{BigEndian, LittleEndian, NativeEndian};
 use std::io::Result;
-use endiannezz::{NativeEndian, LittleEndian, BigEndian, ext::{EndianReader, EndianWriter}};
 
 fn main() -> Result<()> {
     let mut vec = Vec::new();

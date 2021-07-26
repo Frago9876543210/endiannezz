@@ -1,6 +1,5 @@
-use std::io::{Read, Result, Write};
-
 use crate::{Endian, Io, Primitive};
+use std::io::{Read, Result, Write};
 
 pub trait HackedPrimitive: Primitive {
     #[cfg_attr(feature = "inline_primitives", inline)]

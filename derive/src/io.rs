@@ -1,9 +1,7 @@
-use proc_macro2::{Ident, Literal, TokenStream};
-use syn::{Data, DeriveInput, Error, Fields, Result};
-
-use quote::quote;
-
 use crate::{attr, fields};
+use proc_macro2::{Ident, Literal, TokenStream};
+use quote::quote;
+use syn::{Data, DeriveInput, Error, Fields, Result};
 
 pub fn derive(input: DeriveInput) -> Result<TokenStream> {
     let name = &input.ident;

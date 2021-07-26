@@ -1,9 +1,7 @@
-use proc_macro2::{Ident, TokenStream};
-use syn::{Fields, Result, Type};
-
-use quote::{format_ident, quote};
-
 use crate::attr::endian;
+use proc_macro2::{Ident, TokenStream};
+use quote::{format_ident, quote};
+use syn::{Fields, Result, Type};
 
 pub fn write<Named, Unnamed>(
     fields: &Fields,

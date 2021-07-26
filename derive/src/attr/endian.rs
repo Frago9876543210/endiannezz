@@ -1,7 +1,6 @@
+use crate::attr;
 use proc_macro2::{Ident, Span};
 use syn::{Attribute, Error, Meta, NestedMeta, Result};
-
-use crate::attr;
 
 macro_rules! ident {
     ($t:tt) => {

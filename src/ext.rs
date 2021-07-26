@@ -1,8 +1,7 @@
+use crate::{Endian, Primitive};
 use std::io::{Read, Result, Write};
 
-use crate::{BigEndian, Endian, LittleEndian, NativeEndian, Primitive};
-
-/// Allows to write primitive types with differents representation of bytes
+/// Allows to write primitive types with different representation of bytes
 pub trait EndianWriter: Write {
     #[inline]
     fn try_write<E: Endian, T: Primitive>(&mut self, primitive: T) -> Result<()> {
@@ -11,23 +10,23 @@ pub trait EndianWriter: Write {
 
     #[inline]
     fn write_ne<T: Primitive>(&mut self, primitive: T) -> Result<()> {
-        self.try_write::<NativeEndian, T>(primitive)
+        self.try_write::<crate::NativeEndian, T>(primitive)
     }
 
     #[inline]
     fn write_le<T: Primitive>(&mut self, primitive: T) -> Result<()> {
-        self.try_write::<LittleEndian, T>(primitive)
+        self.try_write::<crate::LittleEndian, T>(primitive)
     }
 
     #[inline]
     fn write_be<T: Primitive>(&mut self, primitive: T) -> Result<()> {
-        self.try_write::<BigEndian, T>(primitive)
+        self.try_write::<crate::BigEndian, T>(primitive)
     }
 }
 
 impl<W: Write + ?Sized> EndianWriter for W {}
 
-/// Allows to read primitive types with differents representation of bytes
+/// Allows to read primitive types with different representation of bytes
 pub trait EndianReader: Read {
     #[inline]
     fn try_read<E: Endian, T: Primitive>(&mut self) -> Result<T> {
@@ -36,17 +35,17 @@ pub trait EndianReader: Read {
 
     #[inline]
     fn read_ne<T: Primitive>(&mut self) -> Result<T> {
-        self.try_read::<NativeEndian, T>()
+        self.try_read::<crate::NativeEndian, T>()
     }
 
     #[inline]
     fn read_le<T: Primitive>(&mut self) -> Result<T> {
-        self.try_read::<LittleEndian, T>()
+        self.try_read::<crate::LittleEndian, T>()
     }
 
     #[inline]
     fn read_be<T: Primitive>(&mut self) -> Result<T> {
-        self.try_read::<BigEndian, T>()
+        self.try_read::<crate::BigEndian, T>()
     }
 }
 
