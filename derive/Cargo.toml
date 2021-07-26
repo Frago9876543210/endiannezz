@@ -1,6 +1,6 @@
 [package]
 name = "endiannezz_derive"
-version = "0.2.1"
+version = "0.2.2"
 authors = ["Frago9876543210"]
 edition = "2018"
 license = "MIT"
