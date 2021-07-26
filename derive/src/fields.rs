@@ -81,7 +81,7 @@ pub fn read(fields: &Fields, default_endian: &Ident) -> Result<TokenStream> {
 
 fn read_field(ty: &Type, endian: &Ident) -> TokenStream {
     quote! {
-        #ty::read_hacked::<::endiannezz::#endian, _>(&mut r)?
+        <#ty>::read_hacked::<::endiannezz::#endian, _>(&mut r)?
     }
 }
 
