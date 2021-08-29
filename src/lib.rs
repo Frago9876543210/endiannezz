@@ -1,3 +1,5 @@
+//#![cfg_attr(unstable_feature, feature(const_generics, const_evaluatable_checked))]
+
 /*!
 This crate provides the ability to encode and decode all primitive types into [different endianness]
 
@@ -147,7 +149,7 @@ fn main() -> Result<()> {
 */
 
 use std::io::{Error, ErrorKind, Read, Result, Write};
-use std::mem;
+use std::mem::{self, MaybeUninit};
 
 #[cfg(feature = "derive")]
 #[doc(hidden)]
@@ -266,6 +268,25 @@ pub trait Io: Sized {
     fn read<R: Read>(r: R) -> Result<Self>;
 }
 
+/// Allows the type to be encoded/decoded using binary format (including endian in generics)
+pub trait EndiannessDependentIo: Sized {
+    fn write_with_endianness<E: Endian, W: Write>(&self, w: W) -> Result<()>;
+
+    fn read_with_endianness<E: Endian, R: Read>(r: R) -> Result<Self>;
+}
+
+impl<T: Io> EndiannessDependentIo for T {
+    #[inline(always)]
+    fn write_with_endianness<E: Endian, W: Write>(&self, w: W) -> Result<()> {
+        T::write(self, w)
+    }
+
+    #[inline(always)]
+    fn read_with_endianness<E: Endian, R: Read>(r: R) -> Result<Self> {
+        T::read(r)
+    }
+}
+
 /// Binary representation of a bool
 impl Io for bool {
     #[cfg_attr(feature = "inline_primitives", inline)]
@@ -311,5 +332,27 @@ impl<T: HardcodedPayload> Io for T {
         } else {
             Err(Error::from(ErrorKind::InvalidData))
         }
+    }
+}
+
+impl<T: Primitive, const N: usize> EndiannessDependentIo for [T; N] {
+    #[cfg_attr(feature = "inline_io", inline(always))]
+    fn write_with_endianness<E: Endian, W: Write>(&self, mut w: W) -> Result<()> {
+        for t in self.iter() {
+            E::write(*t, &mut w)?;
+        }
+        Ok(())
+    }
+
+    #[cfg_attr(feature = "inline_io", inline(always))]
+    fn read_with_endianness<E: Endian, R: Read>(mut r: R) -> Result<Self> {
+        //TODO: replace with `MaybeUninit::uninit_array()` when it will be stabilized
+        let mut array = unsafe { MaybeUninit::<[MaybeUninit<T>; N]>::uninit().assume_init() };
+        for uninit in array.iter_mut() {
+            let t = E::read(&mut r)?;
+            *uninit = MaybeUninit::new(t);
+        }
+        //TODO: replace with `MaybeUninit::array_assume_init()`
+        Ok(unsafe { (&array as *const _ as *const [T; N]).read() })
     }
 }
